@@ -506,3 +506,713 @@ mysql> select b.emp2, b.last_name, b.totCnt, ifnull(a.lateCnt,0), ifnull(a.lateC
 |    9 | Dodsworth |     43 |                   5 |           0.12 |
 +------+-----------+--------+---------------------+----------------+
 9 rows in set (0.00 sec)
+
+
+-- 48 --
+-- Andrew Fuller, the VP of sales at Northwind, would like to do a sales campaign for existing customers. He'd like to categorize customers into groups, based on how much they ordered in 2016. Then, depending on which group the customer is in, he will target the customer with different sales materials. The customer grouping categories are 0 to 1,000, 1,000 to 5,000, 5,000 to 10,000, and over 10,000. A good starting point for this query is the answer from the problem “High-value customers - total orders. We don’t want to show customers who don’t have any orders in 2016
+
+mysql> with cte as( 
+select c.customer_id as cus, c.company_name as nam, o.order_id as ordid, ROUND(sum(od.quantity*od.unit_price),2) as amt
+                from customers c 
+            join orders o on o.customer_id = c.customer_id 
+               join order_details od on o.order_id = od.order_id 
+                where order_date between '19980101' and '19981231' 
+                group by cus, nam 
+                  ) 
+select cus, nam, amt, 
+   case  
+      when amt between 0 and 1000 then 'Low'  
+	 when amt Between 1000  and 5000 then 'Medium' 
+      when amt Between 5000  and 10000 then 'High' 
+	  when amt > 10000 then 'Very High'  end  customerGroup 
+	  from cte 
+	  order by nam;
++-------+------------------------------------+----------+---------------+
+| cus   | nam                                | amt      | customerGroup |
++-------+------------------------------------+----------+---------------+
+| ALFKI | Alfreds Futterkiste                |   2302.2 | Medium        |
+| ANATR | Ana Trujillo Emparedados y helados |    514.4 | Low           |
+| ANTON | Antonio Moreno Taquería            |      660 | Low           |
+| AROUT | Around the Horn                    |   5838.5 | High          |
+| BSBEV | B's Beverages                      |     2431 | Medium        |
+| BERGS | Berglunds snabbköp                 |  8110.55 | High          |
+| BLAUS | Blauer See Delikatessen            |     2160 | Medium        |
+| BLONP | Blondesddsl père et fils           |      730 | Low           |
+| BOLID | Bólido Comidas preparadas          |      280 | Low           |
+| BONAP | Bon app'                           |   7185.9 | High          |
+| BOTTM | Bottom-Dollar Markets              |  12227.4 | Very High     |
+| CACTU | Cactus Comidas para llevar         |   1576.8 | Medium        |
+| CHOPS | Chop-suey Chinese                  |   4429.4 | Medium        |
+| COMMI | Comércio Mineiro                   |   513.75 | Low           |
+| CONSH | Consolidated Holdings              |    931.5 | Low           |
+| WANDK | Die Wandernde Kuh                  |     1564 | Medium        |
+| DRACD | Drachenblut Delikatessen           |  2809.61 | Medium        |
+| DUMON | Du monde entier                    |    860.1 | Low           |
+| EASTC | Eastern Connection                 |  9569.31 | High          |
+| ERNSH | Ernst Handel                       |  42598.9 | Very High     |
+| FOLKO | Folk och fä HB                     | 15973.85 | Very High     |
+| FRANR | France restauration                |  2252.06 | Medium        |
+| FRANS | Franchi S.p.A.                     |     1296 | Medium        |
+| FRANK | Frankenversand                     |     5587 | High          |
+| FURIB | Furia Bacalhau e Frutos do Mar     |       68 | Low           |
+| GALED | Galería del gastrónomo             |    207.5 | Low           |
+| GODOS | Godos Cocina Típica                |  7064.05 | High          |
+| GOURL | Gourmet Lanchonetes                |      497 | Low           |
+| GREAL | Great Lakes Food Market            | 10562.58 | Very High     |
+| HANAR | Hanari Carnes                      | 24238.05 | Very High     |
+| HILAA | HILARION-Abastos                   |   6132.3 | High          |
+| HUNGO | Hungry Owl All-Night Grocers       | 22796.34 | Very High     |
+| ISLAT | Island Trading                     |   2684.6 | Medium        |
+| KOENE | Königlich Essen                    | 20204.95 | Very High     |
+| LACOR | La corne d'abondance               |  1992.05 | Medium        |
+| LAMAI | La maison d'Asie                   |  1549.95 | Medium        |
+| LAUGB | Laughing Bacchus Wine Cellars      |      187 | Low           |
+| LEHMS | Lehmanns Marktstand                |  3342.85 | Medium        |
+| LETSS | Let's Stop N Shop                  |   1450.6 | Medium        |
+| LILAS | LILA-Supermercado                  |  5994.06 | High          |
+| LINOD | LINO-Delicateses                   |  10085.6 | Very High     |
+| LONEP | Lonesome Pine Restaurant           |   1709.4 | Medium        |
+| MAGAA | Magazzini Alimentari Riuniti       |     1693 | Medium        |
+| MAISD | Maison Dewey                       |  4746.58 | Medium        |
+| MORGK | Morgenstern Gesundkost             |      245 | Low           |
+| NORTS | North/South                        |       45 | Low           |
+| OCEAN | Océano Atlántico Ltda.             |     3031 | Medium        |
+| OLDWO | Old World Delicatessen             |  5337.65 | High          |
+| OTTIK | Ottilies Käseladen                 |   3012.7 | Medium        |
+| PERIC | Pericles Comidas clásicas          |     1496 | Medium        |
+| PICCO | Piccolo und mehr                   |  4393.75 | Medium        |
+| PRINI | Princesa Isabel Vinhos             |   2633.9 | Medium        |
+| QUEDE | Que Delícia                        |   1353.6 | Medium        |
+| QUEEN | Queen Cozinha                      |  7007.65 | High          |
+| QUICK | QUICK-Stop                         | 40526.99 | Very High     |
+| RANCH | Rancho grande                      |   1694.7 | Medium        |
+| RATTC | Rattlesnake Canyon Grocery         |  21725.6 | Very High     |
+| REGGC | Reggiani Caseifici                 |     4263 | Medium        |
+| RICAR | Ricardo Adocicados                 |     7312 | High          |
+| RICSU | Richter Supermarkt                 |   5497.9 | High          |
+| ROMEY | Romero y tomillo                   |   726.89 | Low           |
+| SANTG | Santé Gourmet                      |  3976.75 | Medium        |
+| SAVEA | Save-a-lot Markets                 | 42806.25 | Very High     |
+| SEVES | Seven Seas Imports                 |     1630 | Medium        |
+| SIMOB | Simons bistro                      |    244.3 | Low           |
+| SPECD | Spécialités du monde               |     2371 | Medium        |
+| SPLIR | Split Rail Beer & Ale              |     1117 | Medium        |
+| SUPRD | Suprêmes délices                   |  11862.5 | Very High     |
+| THEBI | The Big Cheese                     |     69.6 | Low           |
+| THECR | The Cracker Box                    |      326 | Low           |
+| TOMSP | Toms Spezialitäten                 |    910.4 | Low           |
+| TORTU | Tortuga Restaurante                |   1874.5 | Medium        |
+| TRADH | Tradiçao Hipermercados             |  4401.62 | Medium        |
+| TRAIH | Trail's Head Gourmet Provisioners  |    237.9 | Low           |
+| VAFFE | Vaffeljernet                       |   4333.5 | Medium        |
+| VICTE | Victuailles en stock               |     3022 | Medium        |
+| WARTH | Wartian Herkku                     |      300 | Low           |
+| WELLI | Wellington Importadora             |     1245 | Medium        |
+| WHITC | White Clover Markets               |  15278.9 | Very High     |
+| WILMK | Wilman Kala                        |     1987 | Medium        |
+| WOLZA | Wolski  Zajazd                     |   1865.1 | Medium        |
++-------+------------------------------------+----------+---------------+
+81 rows in set (0.01 sec)
+
+-- 49 --
+-- Customer grouping - fix null There's a bug with the answer for the previous question. The CustomerGroup value for one of the rows is null. Fix the SQL so that there are no nulls in the CustomerGroup field
+
+mysql> with cte as( 
+select c.customer_id as cus, c.company_name as nam, o.order_id as ordid, ROUND(sum(od.quantity*od.unit_price),2) as amt
+                from customers c 
+            join orders o on o.customer_id = c.customer_id 
+               join order_details od on o.order_id = od.order_id 
+                where order_date between '19980101' and '19981231' 
+                group by cus, nam 
+                  ) 
+select cus, nam, amt, 
+   case  
+      when amt  >=0 and amt < 1000 then 'Low'  
+	 when amt  >=1000  and amt < 5000 then 'Medium' 
+      when amt >=5000  and amt < 10000 then 'High' 
+	  when amt >= 10000 then 'Very High'  end  customerGroup 
+	  from cte 
+	  order by nam;
++-------+------------------------------------+----------+---------------+
+| cus   | nam                                | amt      | customerGroup |
++-------+------------------------------------+----------+---------------+
+| ALFKI | Alfreds Futterkiste                |   2302.2 | Medium        |
+| ANATR | Ana Trujillo Emparedados y helados |    514.4 | Low           |
+| ANTON | Antonio Moreno Taquería            |      660 | Low           |
+| AROUT | Around the Horn                    |   5838.5 | High          |
+| BSBEV | B's Beverages                      |     2431 | Medium        |
+| BERGS | Berglunds snabbköp                 |  8110.55 | High          |
+| BLAUS | Blauer See Delikatessen            |     2160 | Medium        |
+| BLONP | Blondesddsl père et fils           |      730 | Low           |
+| BOLID | Bólido Comidas preparadas          |      280 | Low           |
+| BONAP | Bon app'                           |   7185.9 | High          |
+| BOTTM | Bottom-Dollar Markets              |  12227.4 | Very High     |
+| CACTU | Cactus Comidas para llevar         |   1576.8 | Medium        |
+| CHOPS | Chop-suey Chinese                  |   4429.4 | Medium        |
+| COMMI | Comércio Mineiro                   |   513.75 | Low           |
+| CONSH | Consolidated Holdings              |    931.5 | Low           |
+| WANDK | Die Wandernde Kuh                  |     1564 | Medium        |
+| DRACD | Drachenblut Delikatessen           |  2809.61 | Medium        |
+| DUMON | Du monde entier                    |    860.1 | Low           |
+| EASTC | Eastern Connection                 |  9569.31 | High          |
+| ERNSH | Ernst Handel                       |  42598.9 | Very High     |
+| FOLKO | Folk och fä HB                     | 15973.85 | Very High     |
+| FRANR | France restauration                |  2252.06 | Medium        |
+| FRANS | Franchi S.p.A.                     |     1296 | Medium        |
+| FRANK | Frankenversand                     |     5587 | High          |
+| FURIB | Furia Bacalhau e Frutos do Mar     |       68 | Low           |
+| GALED | Galería del gastrónomo             |    207.5 | Low           |
+| GODOS | Godos Cocina Típica                |  7064.05 | High          |
+| GOURL | Gourmet Lanchonetes                |      497 | Low           |
+| GREAL | Great Lakes Food Market            | 10562.58 | Very High     |
+| HANAR | Hanari Carnes                      | 24238.05 | Very High     |
+| HILAA | HILARION-Abastos                   |   6132.3 | High          |
+| HUNGO | Hungry Owl All-Night Grocers       | 22796.34 | Very High     |
+| ISLAT | Island Trading                     |   2684.6 | Medium        |
+| KOENE | Königlich Essen                    | 20204.95 | Very High     |
+| LACOR | La corne d'abondance               |  1992.05 | Medium        |
+| LAMAI | La maison d'Asie                   |  1549.95 | Medium        |
+| LAUGB | Laughing Bacchus Wine Cellars      |      187 | Low           |
+| LEHMS | Lehmanns Marktstand                |  3342.85 | Medium        |
+| LETSS | Let's Stop N Shop                  |   1450.6 | Medium        |
+| LILAS | LILA-Supermercado                  |  5994.06 | High          |
+| LINOD | LINO-Delicateses                   |  10085.6 | Very High     |
+| LONEP | Lonesome Pine Restaurant           |   1709.4 | Medium        |
+| MAGAA | Magazzini Alimentari Riuniti       |     1693 | Medium        |
+| MAISD | Maison Dewey                       |  4746.58 | Medium        |
+| MORGK | Morgenstern Gesundkost             |      245 | Low           |
+| NORTS | North/South                        |       45 | Low           |
+| OCEAN | Océano Atlántico Ltda.             |     3031 | Medium        |
+| OLDWO | Old World Delicatessen             |  5337.65 | High          |
+| OTTIK | Ottilies Käseladen                 |   3012.7 | Medium        |
+| PERIC | Pericles Comidas clásicas          |     1496 | Medium        |
+| PICCO | Piccolo und mehr                   |  4393.75 | Medium        |
+| PRINI | Princesa Isabel Vinhos             |   2633.9 | Medium        |
+| QUEDE | Que Delícia                        |   1353.6 | Medium        |
+| QUEEN | Queen Cozinha                      |  7007.65 | High          |
+| QUICK | QUICK-Stop                         | 40526.99 | Very High     |
+| RANCH | Rancho grande                      |   1694.7 | Medium        |
+| RATTC | Rattlesnake Canyon Grocery         |  21725.6 | Very High     |
+| REGGC | Reggiani Caseifici                 |     4263 | Medium        |
+| RICAR | Ricardo Adocicados                 |     7312 | High          |
+| RICSU | Richter Supermarkt                 |   5497.9 | High          |
+| ROMEY | Romero y tomillo                   |   726.89 | Low           |
+| SANTG | Santé Gourmet                      |  3976.75 | Medium        |
+| SAVEA | Save-a-lot Markets                 | 42806.25 | Very High     |
+| SEVES | Seven Seas Imports                 |     1630 | Medium        |
+| SIMOB | Simons bistro                      |    244.3 | Low           |
+| SPECD | Spécialités du monde               |     2371 | Medium        |
+| SPLIR | Split Rail Beer & Ale              |     1117 | Medium        |
+| SUPRD | Suprêmes délices                   |  11862.5 | Very High     |
+| THEBI | The Big Cheese                     |     69.6 | Low           |
+| THECR | The Cracker Box                    |      326 | Low           |
+| TOMSP | Toms Spezialitäten                 |    910.4 | Low           |
+| TORTU | Tortuga Restaurante                |   1874.5 | Medium        |
+| TRADH | Tradiçao Hipermercados             |  4401.62 | Medium        |
+| TRAIH | Trail's Head Gourmet Provisioners  |    237.9 | Low           |
+| VAFFE | Vaffeljernet                       |   4333.5 | Medium        |
+| VICTE | Victuailles en stock               |     3022 | Medium        |
+| WARTH | Wartian Herkku                     |      300 | Low           |
+| WELLI | Wellington Importadora             |     1245 | Medium        |
+| WHITC | White Clover Markets               |  15278.9 | Very High     |
+| WILMK | Wilman Kala                        |     1987 | Medium        |
+| WOLZA | Wolski  Zajazd                     |   1865.1 | Medium        |
++-------+------------------------------------+----------+---------------+
+81 rows in set (0.01 sec)
+
+-- 50 --
+-- Customer grouping with percentage Based on the above query, show all the defined CustomerGroups, and the percentage in each. Sort by the total in each group, in descending order.
+
+mysql>  with totcte as (
+      with cte as( 
+select c.customer_id as cus, c.company_name as nam, o.order_id as ordid, ROUND(sum(od.quantity*od.unit_price),2) as amt
+                from customers c 
+            join orders o on o.customer_id = c.customer_id 
+               join order_details od on o.order_id = od.order_id 
+                where order_date between '19980101' and '19981231' 
+                group by cus, nam 
+                  ) 
+select cus, nam, amt, 
+   case  
+      when amt between 0 and 1000 then 'Low'  
+	 when amt Between 1000  and 5000 then 'Medium' 
+      when amt Between 5000  and 10000 then 'High' 
+	  when amt > 10000 then 'Very High'  end  customerGroup 
+	  from cte )
+      select customergroup, count(*) as totalCnt , count(*)  / sum(count(*)) Over() as 'Percentage'
+      from totcte 
+      group by customergroup;
++---------------+----------+------------+
+| customerGroup | totalCnt | Percentage |
++---------------+----------+------------+
+| High          |       12 |     0.1481 |
+| Medium        |       36 |     0.4444 |
+| Low           |       20 |     0.2469 |
+| Very High     |       13 |     0.1605 |
++---------------+----------+------------+
+4 rows in set (0.01 sec)
+
+-- 51 --
+-- Customer grouping - flexible Andrew, the VP of Sales is still thinking about how best to group customers, and define low, medium, high, and very high value customers. He now wants complete flexibility in grouping the customers, based on the dollar amount they've ordered. He doesn’t want to have to edit SQL in order to change the boundaries of the customer groups. How would you write the SQL? There's a table called CustomerGroupThreshold that you will need to use. Use only orders from 1998.
+mysql>
+  CREATE TABLE `customerthreshold` (
+  `rangebottom` int DEFAULT NULL,
+  `rangetop` int DEFAULT NULL,
+  `customergroup` varchar(45) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='customerthreshhold';
+insert into customerthreshold values (0,1000,'Low');
+insert into customerthreshold values (1000,5000,'Medium');
+insert into customerthreshold values (5000,10000,'High');
+insert into customerthreshold values (10000,999999,'Very High');
+with Orders1998 as 
+( Select Customers.Customer_ID ,Customers.Company_Name , SUM(Quantity * Unit_Price) TotalOrderAmount
+ From Customers Join Orders on Orders.Customer_ID = Customers.Customer_ID 
+ Join Order_Details on Orders.Order_ID = Order_Details.Order_ID 
+ Where Order_Date >= '19980101' and Order_Date < '19990101'
+ Group by Customers.Customer_ID ,Customers.Company_Name )
+ Select Customer_ID ,Company_Name ,TotalOrderAmount ,CustomerGroup
+ from Orders1998 Join customerthreshold 
+ on Orders1998.TotalOrderAmount between customerthreshold.RangeBottom and customerthreshold.RangeTop
+ Order by Customer_ID;
+
++-------------+------------------------------------+--------------------+---------------+
+| Customer_ID | Company_Name                       | TotalOrderAmount   | CustomerGroup |
++-------------+------------------------------------+--------------------+---------------+
+| ALFKI       | Alfreds Futterkiste                | 2302.1999969999997 | Medium        |
+| ANATR       | Ana Trujillo Emparedados y helados |  514.3999906700001 | Low           |
+| ANTON       | Antonio Moreno Taquería            |                660 | Low           |
+| AROUT       | Around the Horn                    |             5838.5 | High          |
+| BERGS       | Berglunds snabbköp                 |      8110.54990875 | High          |
+| BLAUS       | Blauer See Delikatessen            |               2160 | Medium        |
+| BLONP       | Blondesddsl père et fils           |                730 | Low           |
+| BOLID       | Bólido Comidas preparadas          |                280 | Low           |
+| BONAP       | Bon app'                           |       7185.9000077 | High          |
+| BOTTM       | Bottom-Dollar Markets              | 12227.399949600001 | Very High     |
+| BSBEV       | B's Beverages                      |               2431 | Medium        |
+| CACTU       | Cactus Comidas para llevar         |        1576.799988 | Medium        |
+| CHOPS       | Chop-suey Chinese                  |       4429.4000534 | Medium        |
+| COMMI       | Comércio Mineiro                   |         513.750012 | Low           |
+| CONSH       | Consolidated Holdings              |         931.500012 | Low           |
+| DRACD       | Drachenblut Delikatessen           |      2809.60997458 | Medium        |
+| DUMON       | Du monde entier                    |       860.09999468 | Low           |
+| EASTC       | Eastern Connection                 |  9569.309973200001 | High          |
+| ERNSH       | Ernst Handel                       |      42598.8999409 | Very High     |
+| FOLKO       | Folk och fä HB                     | 15973.850057340002 | Very High     |
+| FRANK       | Frankenversand                     |  5586.999983850001 | High          |
+| FRANR       | France restauration                |        2252.060014 | Medium        |
+| FRANS       | Franchi S.p.A.                     |               1296 | Medium        |
+| FURIB       | Furia Bacalhau e Frutos do Mar     |                 68 | Low           |
+| GALED       | Galería del gastrónomo             |              207.5 | Low           |
+| GODOS       | Godos Cocina Típica                | 7064.0499672000005 | High          |
+| GOURL       | Gourmet Lanchonetes                |                497 | Low           |
+| GREAL       | Great Lakes Food Market            |       10562.579986 | Very High     |
+| HANAR       | Hanari Carnes                      |     24238.04997655 | Very High     |
+| HILAA       | HILARION-Abastos                   |      6132.29993148 | High          |
+| HUNGO       | Hungry Owl All-Night Grocers       |      22796.3401198 | Very High     |
+| ISLAT       | Island Trading                     |       2684.5999984 | Medium        |
+| KOENE       | Königlich Essen                    | 20204.949930000002 | Very High     |
+| LACOR       | La corne d'abondance               |      1992.05001022 | Medium        |
+| LAMAI       | La maison d'Asie                   |       1549.9500128 | Medium        |
+| LAUGB       | Laughing Bacchus Wine Cellars      |                187 | Low           |
+| LEHMS       | Lehmanns Marktstand                |        3342.850015 | Medium        |
+| LETSS       | Let's Stop N Shop                  |       1450.5999904 | Medium        |
+| LILAS       | LILA-Supermercado                  | 5994.0599938000005 | High          |
+| LINOD       | LINO-Delicateses                   |     10085.59997811 | Very High     |
+| LONEP       | Lonesome Pine Restaurant           |       1709.3999976 | Medium        |
+| MAGAA       | Magazzini Alimentari Riuniti       | 1692.9999923999999 | Medium        |
+| MAISD       | Maison Dewey                       | 4746.5799978000005 | Medium        |
+| MORGK       | Morgenstern Gesundkost             |                245 | Low           |
+| NORTS       | North/South                        |                 45 | Low           |
+| OCEAN       | Océano Atlántico Ltda.             |        3031.000004 | Medium        |
+| OLDWO       | Old World Delicatessen             |       5337.6500376 | High          |
+| OTTIK       | Ottilies Käseladen                 |       3012.6999852 | Medium        |
+| PERIC       | Pericles Comidas clásicas          |               1496 | Medium        |
+| PICCO       | Piccolo und mehr                   |            4393.75 | Medium        |
+| PRINI       | Princesa Isabel Vinhos             | 2633.9000100000003 | Medium        |
+| QUEDE       | Que Delícia                        |      1353.59999848 | Medium        |
+| QUEEN       | Queen Cozinha                      |        7007.649978 | High          |
+| QUICK       | QUICK-Stop                         |      40526.9899245 | Very High     |
+| RANCH       | Rancho grande                      |       1694.7000048 | Medium        |
+| RATTC       | Rattlesnake Canyon Grocery         |     21725.59992846 | Very High     |
+| REGGC       | Reggiani Caseifici                 |         4262.99996 | Medium        |
+| RICAR       | Ricardo Adocicados                 |        7312.000024 | High          |
+| RICSU       | Richter Supermarkt                 |      5497.89994172 | High          |
+| ROMEY       | Romero y tomillo                   |  726.8899994000001 | Low           |
+| SANTG       | Santé Gourmet                      |      3976.75000072 | Medium        |
+| SAVEA       | Save-a-lot Markets                 | 42806.250035080004 | Very High     |
+| SEVES       | Seven Seas Imports                 |               1630 | Medium        |
+| SIMOB       | Simons bistro                      | 244.30001120000003 | Low           |
+| SPECD       | Spécialités du monde               |               2371 | Medium        |
+| SPLIR       | Split Rail Beer & Ale              |        1117.000015 | Medium        |
+| SUPRD       | Suprêmes délices                   |      11862.5000336 | Very High     |
+| THEBI       | The Big Cheese                     |         69.5999984 | Low           |
+| THECR       | The Cracker Box                    |         325.999996 | Low           |
+| TOMSP       | Toms Spezialitäten                 |       910.39999772 | Low           |
+| TORTU       | Tortuga Restaurante                |       1874.4999981 | Medium        |
+| TRADH       | Tradiçao Hipermercados             |  4401.619984000001 | Medium        |
+| TRAIH       | Trail's Head Gourmet Provisioners  |        237.8999976 | Low           |
+| VAFFE       | Vaffeljernet                       |         4333.50006 | Medium        |
+| VICTE       | Victuailles en stock               |       3021.9999924 | Medium        |
+| WANDK       | Die Wandernde Kuh                  |               1564 | Medium        |
+| WARTH       | Wartian Herkku                     |                300 | Low           |
+| WELLI       | Wellington Importadora             |               1245 | Medium        |
+| WHITC       | White Clover Markets               |     15278.89996402 | Very High     |
+| WILMK       | Wilman Kala                        | 1986.9999804200002 | Medium        |
+| WOLZA       | Wolski  Zajazd                     |       1865.0999904 | Medium        |
++-------------+------------------------------------+--------------------+---------------+
+-- 52 --
+-- Countries with suppliers or customers Some Northwind employees are planning a business trip, and would like to visit as many suppliers and customers as possible. For their planning, they’d like to see a list of all countries where suppliers and/or customers are based.
+
+mysql>  select distinct country from customers 
+      union
+      select distinct country from suppliers;
++-------------+
+| country     |
++-------------+
+| Argentina   |
+| Australia   |
+| Austria     |
+| Belgium     |
+| Brazil      |
+| Canada      |
+| Denmark     |
+| Finland     |
+| France      |
+| Germany     |
+| Ireland     |
+| Italy       |
+| Japan       |
+| Mexico      |
+| Netherlands |
+| Norway      |
+| Poland      |
+| Portugal    |
+| Singapore   |
+| Spain       |
+| Sweden      |
+| Switzerland |
+| UK          |
+| USA         |
+| Venezuela   |
++-------------+
+25 rows in set (0.01 sec)
+
+-- 53 --
+-- Countries with suppliers or customers, version 2 The employees going on the business trip don’t want just a raw list of countries, they want more details.
+
+mysql>  select scon supplier_Country, ccon customer_country from
+  ( (SELECT DISTINCT c.country ccon
+       FROM customers c
+       WHERE NOT EXISTS (SELECT *
+                                FROM suppliers s
+                                WHERE s.country = c.country)) a
+		left join
+   (  SELECT    s.country scon
+       FROM suppliers s
+       WHERE NOT EXISTS (SELECT *
+                                FROM customers c
+                                WHERE s.country = c.country)) b
+                                on a.ccon=b.scon)
+                                union
+	(select  scon supplier_Country, ccon customer_country from
+   (SELECT DISTINCT c.country ccon
+       FROM customers c
+       WHERE NOT EXISTS (SELECT *
+                                FROM suppliers s
+                                WHERE s.country = c.country)) a
+		right join
+   (  SELECT    s.country scon
+       FROM suppliers s
+       WHERE NOT EXISTS (SELECT *
+                                FROM customers c
+                                WHERE s.country = c.country)) b
+                                on a.ccon=b.scon)
+     union                           
+	(select distinct customers.country supplier_Country, customers.country customer_country from customers
+    join suppliers on customers.country  = suppliers.country)
+	ORDER BY 
+  CASE WHEN customer_country is null then 0   else 1 END ; 
+  
+  +------------------+------------------+
+| supplier_Country | customer_country |
++------------------+------------------+
+| Japan            | NULL             |
+| Australia        | NULL             |
+| Singapore        | NULL             |
+| Netherlands      | NULL             |
+| NULL             | Mexico           |
+| NULL             | Argentina        |
+| NULL             | Switzerland      |
+| NULL             | Austria          |
+| NULL             | Portugal         |
+| NULL             | Venezuela        |
+| NULL             | Ireland          |
+| NULL             | Belgium          |
+| NULL             | Poland           |
+| Germany          | Germany          |
+| UK               | UK               |
+| Sweden           | Sweden           |
+| France           | France           |
+| Spain            | Spain            |
+| Canada           | Canada           |
+| Brazil           | Brazil           |
+| Italy            | Italy            |
+| USA              | USA              |
+| Norway           | Norway           |
+| Denmark          | Denmark          |
+| Finland          | Finland          |
++------------------+------------------+
+25 rows in set (0.00 sec)
+
+-- 54 --
+-- Countries with suppliers or customers - version 3 The output of the above is improved, but it’s still not ideal What we’d really like to see is the country name, the total suppliers, and the total customers
+
+mysql> with allcountries as
+         (select distinct suppliers.country from suppliers
+     union
+      select distinct customers.country from customers),
+       totcusts as 
+      (select  customers.country, count(*) as  ccnt from customers group by country),
+       totsupp as 
+     ( select  suppliers.country, count(*) as scnt from suppliers group by country)
+     select allcountries.country, ifnull(totsupp.scnt,0) as Suppliers, ifnull(totcusts.ccnt,0) as Customers  from
+     allcountries
+     left join totcusts on allcountries.country = totcusts.country 
+     left join totsupp on allcountries.country = totsupp.country
+     order by allcountries.country;
+	 +-------------+-----------+-----------+
+| country     | Suppliers | Customers |
++-------------+-----------+-----------+
+| Argentina   |         0 |         3 |
+| Australia   |         2 |         0 |
+| Austria     |         0 |         2 |
+| Belgium     |         0 |         2 |
+| Brazil      |         1 |         9 |
+| Canada      |         2 |         3 |
+| Denmark     |         1 |         2 |
+| Finland     |         1 |         2 |
+| France      |         3 |        11 |
+| Germany     |         3 |        11 |
+| Ireland     |         0 |         1 |
+| Italy       |         2 |         3 |
+| Japan       |         2 |         0 |
+| Mexico      |         0 |         5 |
+| Netherlands |         1 |         0 |
+| Norway      |         1 |         1 |
+| Poland      |         0 |         1 |
+| Portugal    |         0 |         2 |
+| Singapore   |         1 |         0 |
+| Spain       |         1 |         5 |
+| Sweden      |         2 |         2 |
+| Switzerland |         0 |         2 |
+| UK          |         2 |         7 |
+| USA         |         4 |        13 |
+| Venezuela   |         0 |         4 |
++-------------+-----------+-----------+
+25 rows in set (0.00 sec)
+
+-- 55 --Looking at the Orders table—we’d like to show details for each order that was the first in that particular country, ordered by OrderID. So, we need one row per ShipCountry, and CustomerID, OrderID, and OrderDate should be of the first order from that country
+
+mysql>  with cte as     
+(Select Ship_Country ,Customer_ID ,Order_ID ,Order_Date ,
+ Row_Number() over (Partition by Ship_Country Order by Ship_Country, Order_ID)   orderRank
+ from orders )
+ select Ship_Country ,Customer_ID ,Order_ID ,Order_Date  From cte where orderRank =1
+ order by Ship_Country ,Order_ID;
+ 
++--------------+-------------+----------+---------------------+
+| Ship_Country | Customer_ID | Order_ID | Order_Date          |
++--------------+-------------+----------+---------------------+
+| Argentina    | OCEAN       |    10409 | 1997-01-09 00:00:00 |
+| Austria      | ERNSH       |    10258 | 1996-07-17 00:00:00 |
+| Belgium      | SUPRD       |    10252 | 1996-07-09 00:00:00 |
+| Brazil       | HANAR       |    10250 | 1996-07-08 00:00:00 |
+| Canada       | MEREP       |    10332 | 1996-10-17 00:00:00 |
+| Denmark      | SIMOB       |    10341 | 1996-10-29 00:00:00 |
+| Finland      | WARTH       |    10266 | 1996-07-26 00:00:00 |
+| France       | VINET       |    10248 | 1996-07-04 00:00:00 |
+| Germany      | TOMSP       |    10249 | 1996-07-05 00:00:00 |
+| Ireland      | HUNGO       |    10298 | 1996-09-05 00:00:00 |
+| Italy        | MAGAA       |    10275 | 1996-08-07 00:00:00 |
+| Mexico       | CENTC       |    10259 | 1996-07-18 00:00:00 |
+| Norway       | SANTG       |    10387 | 1996-12-18 00:00:00 |
+| Poland       | WOLZA       |    10374 | 1996-12-05 00:00:00 |
+| Portugal     | FURIB       |    10328 | 1996-10-14 00:00:00 |
+| Spain        | ROMEY       |    10281 | 1996-08-14 00:00:00 |
+| Sweden       | FOLKO       |    10264 | 1996-07-24 00:00:00 |
+| Switzerland  | CHOPS       |    10254 | 1996-07-11 00:00:00 |
+| UK           | BSBEV       |    10289 | 1996-08-26 00:00:00 |
+| USA          | RATTC       |    10262 | 1996-07-22 00:00:00 |
+| Venezuela    | HILAA       |    10257 | 1996-07-16 00:00:00 |
++--------------+-------------+----------+---------------------+
+21 rows in set (0.00 sec)
+
+-- 56 --
+-- Customers with multiple orders in 5 day period There are some customers for whom freight is a major expense when ordering from Northwind. However, by batching up their orders, and making one larger order instead of multiple smaller orders in a short period of time, they could reduce their freight costs significantly. Show those customers who have made more than 1 order in a 5 day period. The sales people will use this to help customers reduce their costs.
+
+mysql> Select firstOrder.customer_id , firstOrder.Order_id firstOrderId, firstOrder.Order_date firstOrderDate  ,
+  NextOrder.Order_id NextOrderID , NextOrder.Order_Date  NextOrderDate,
+   datediff( nextOrder.Order_Date, firstOrder.Order_Date) DaysBetween
+  from Orders firstOrder 
+  join Orders NextOrder on firstOrder.Customer_ID = NextOrder.Customer_ID 
+  where firstOrder.Order_ID < NextOrder.Order_ID 
+  and datediff( NextOrder.Order_date, firstOrder.Order_Date) <= 5
+  Order by firstOrder.Customer_ID ,firstOrder.Order_ID;
+
++-------------+--------------+---------------------+-------------+---------------------+-------------+
+| customer_id | firstOrderId | firstOrderDate      | NextOrderID | NextOrderDate       | DaysBetween |
++-------------+--------------+---------------------+-------------+---------------------+-------------+
+| ANTON       |        10677 | 1997-09-22 00:00:00 |       10682 | 1997-09-25 00:00:00 |           3 |
+| AROUT       |        10741 | 1997-11-14 00:00:00 |       10743 | 1997-11-17 00:00:00 |           3 |
+| BERGS       |        10278 | 1996-08-12 00:00:00 |       10280 | 1996-08-14 00:00:00 |           2 |
+| BERGS       |        10444 | 1997-02-12 00:00:00 |       10445 | 1997-02-13 00:00:00 |           1 |
+| BERGS       |        10866 | 1998-02-03 00:00:00 |       10875 | 1998-02-06 00:00:00 |           3 |
+| BONAP       |        10730 | 1997-11-05 00:00:00 |       10732 | 1997-11-06 00:00:00 |           1 |
+| BONAP       |        10871 | 1998-02-05 00:00:00 |       10876 | 1998-02-09 00:00:00 |           4 |
+| BONAP       |        10932 | 1998-03-06 00:00:00 |       10940 | 1998-03-11 00:00:00 |           5 |
+| BOTTM       |        10410 | 1997-01-10 00:00:00 |       10411 | 1997-01-10 00:00:00 |           0 |
+| BOTTM       |        10944 | 1998-03-12 00:00:00 |       10949 | 1998-03-13 00:00:00 |           1 |
+| BOTTM       |        10975 | 1998-03-25 00:00:00 |       10982 | 1998-03-27 00:00:00 |           2 |
+| BOTTM       |        11045 | 1998-04-23 00:00:00 |       11048 | 1998-04-24 00:00:00 |           1 |
+| BSBEV       |        10538 | 1997-05-15 00:00:00 |       10539 | 1997-05-16 00:00:00 |           1 |
+| BSBEV       |        10943 | 1998-03-11 00:00:00 |       10947 | 1998-03-13 00:00:00 |           2 |
+| EASTC       |        11047 | 1998-04-24 00:00:00 |       11056 | 1998-04-28 00:00:00 |           4 |
+| ERNSH       |        10402 | 1997-01-02 00:00:00 |       10403 | 1997-01-03 00:00:00 |           1 |
+| ERNSH       |        10771 | 1997-12-10 00:00:00 |       10773 | 1997-12-11 00:00:00 |           1 |
+| ERNSH       |        10771 | 1997-12-10 00:00:00 |       10776 | 1997-12-15 00:00:00 |           5 |
+| ERNSH       |        10773 | 1997-12-11 00:00:00 |       10776 | 1997-12-15 00:00:00 |           4 |
+| ERNSH       |        10968 | 1998-03-23 00:00:00 |       10979 | 1998-03-26 00:00:00 |           3 |
+| ERNSH       |        11008 | 1998-04-08 00:00:00 |       11017 | 1998-04-13 00:00:00 |           5 |
+| FOLKO       |        10977 | 1998-03-26 00:00:00 |       10980 | 1998-03-27 00:00:00 |           1 |
+| FOLKO       |        10980 | 1998-03-27 00:00:00 |       10993 | 1998-04-01 00:00:00 |           5 |
+| FOLKO       |        10993 | 1998-04-01 00:00:00 |       11001 | 1998-04-06 00:00:00 |           5 |
+| FRANK       |        10670 | 1997-09-16 00:00:00 |       10675 | 1997-09-19 00:00:00 |           3 |
+| GODOS       |        10872 | 1998-02-05 00:00:00 |       10874 | 1998-02-06 00:00:00 |           1 |
+| GREAL       |        10616 | 1997-07-31 00:00:00 |       10617 | 1997-07-31 00:00:00 |           0 |
+| HANAR       |        10250 | 1996-07-08 00:00:00 |       10253 | 1996-07-10 00:00:00 |           2 |
+| HANAR       |        10922 | 1998-03-03 00:00:00 |       10925 | 1998-03-04 00:00:00 |           1 |
+| HILAA       |        10486 | 1997-03-26 00:00:00 |       10490 | 1997-03-31 00:00:00 |           5 |
+| HILAA       |        10957 | 1998-03-18 00:00:00 |       10960 | 1998-03-19 00:00:00 |           1 |
+| ISLAT       |        10315 | 1996-09-26 00:00:00 |       10318 | 1996-10-01 00:00:00 |           5 |
+| ISLAT       |        10318 | 1996-10-01 00:00:00 |       10321 | 1996-10-03 00:00:00 |           2 |
+| KOENE       |        10323 | 1996-10-07 00:00:00 |       10325 | 1996-10-09 00:00:00 |           2 |
+| KOENE       |        10456 | 1997-02-25 00:00:00 |       10457 | 1997-02-25 00:00:00 |           0 |
+| LACOR       |        10972 | 1998-03-24 00:00:00 |       10973 | 1998-03-24 00:00:00 |           0 |
+| LEHMS       |        10534 | 1997-05-12 00:00:00 |       10536 | 1997-05-14 00:00:00 |           2 |
+| LEHMS       |        10592 | 1997-07-08 00:00:00 |       10593 | 1997-07-09 00:00:00 |           1 |
+| LILAS       |        11065 | 1998-05-01 00:00:00 |       11071 | 1998-05-05 00:00:00 |           4 |
+| LINOD       |        10838 | 1998-01-19 00:00:00 |       10840 | 1998-01-19 00:00:00 |           0 |
+| LONEP       |        10662 | 1997-09-09 00:00:00 |       10665 | 1997-09-11 00:00:00 |           2 |
+| MAISD       |        10892 | 1998-02-17 00:00:00 |       10896 | 1998-02-19 00:00:00 |           2 |
+| MEREP       |        10618 | 1997-08-01 00:00:00 |       10619 | 1997-08-04 00:00:00 |           3 |
+| QUEEN       |        10913 | 1998-02-26 00:00:00 |       10914 | 1998-02-27 00:00:00 |           1 |
+| QUICK       |        10285 | 1996-08-20 00:00:00 |       10286 | 1996-08-21 00:00:00 |           1 |
+| QUICK       |        10691 | 1997-10-03 00:00:00 |       10694 | 1997-10-06 00:00:00 |           3 |
+| QUICK       |        10991 | 1998-04-01 00:00:00 |       10996 | 1998-04-02 00:00:00 |           1 |
+| RATTC       |        10314 | 1996-09-25 00:00:00 |       10316 | 1996-09-27 00:00:00 |           2 |
+| RICSU       |        10751 | 1997-11-24 00:00:00 |       10758 | 1997-11-28 00:00:00 |           4 |
+| ROMEY       |        10281 | 1996-08-14 00:00:00 |       10282 | 1996-08-15 00:00:00 |           1 |
+| SAVEA       |        10393 | 1996-12-25 00:00:00 |       10398 | 1996-12-30 00:00:00 |           5 |
+| SAVEA       |        10603 | 1997-07-18 00:00:00 |       10607 | 1997-07-22 00:00:00 |           4 |
+| SAVEA       |        10711 | 1997-10-21 00:00:00 |       10713 | 1997-10-22 00:00:00 |           1 |
+| SAVEA       |        10711 | 1997-10-21 00:00:00 |       10714 | 1997-10-22 00:00:00 |           1 |
+| SAVEA       |        10713 | 1997-10-22 00:00:00 |       10714 | 1997-10-22 00:00:00 |           0 |
+| SAVEA       |        10983 | 1998-03-27 00:00:00 |       10984 | 1998-03-30 00:00:00 |           3 |
+| SAVEA       |        11030 | 1998-04-17 00:00:00 |       11031 | 1998-04-17 00:00:00 |           0 |
+| SEVES       |        10800 | 1997-12-26 00:00:00 |       10804 | 1997-12-30 00:00:00 |           4 |
+| SUPRD       |        10841 | 1998-01-20 00:00:00 |       10846 | 1998-01-22 00:00:00 |           2 |
+| SUPRD       |        11035 | 1998-04-20 00:00:00 |       11038 | 1998-04-21 00:00:00 |           1 |
+| TRADH       |        10830 | 1998-01-13 00:00:00 |       10834 | 1998-01-15 00:00:00 |           2 |
+| TRADH       |        10834 | 1998-01-15 00:00:00 |       10839 | 1998-01-19 00:00:00 |           4 |
+| TRAIH       |        10574 | 1997-06-19 00:00:00 |       10577 | 1997-06-23 00:00:00 |           4 |
+| VICTE       |        10806 | 1997-12-31 00:00:00 |       10814 | 1998-01-05 00:00:00 |           5 |
+| VICTE       |        10843 | 1998-01-21 00:00:00 |       10850 | 1998-01-23 00:00:00 |           2 |
+| VINET       |        10737 | 1997-11-11 00:00:00 |       10739 | 1997-11-12 00:00:00 |           1 |
+| WARTH       |        10412 | 1997-01-13 00:00:00 |       10416 | 1997-01-16 00:00:00 |           3 |
+| WELLI       |        10803 | 1997-12-30 00:00:00 |       10809 | 1998-01-01 00:00:00 |           2 |
+| WELLI       |        10900 | 1998-02-20 00:00:00 |       10905 | 1998-02-24 00:00:00 |           4 |
+| WHITC       |        10693 | 1997-10-06 00:00:00 |       10696 | 1997-10-08 00:00:00 |           2 |
+| WILMK       |        10873 | 1998-02-06 00:00:00 |       10879 | 1998-02-10 00:00:00 |           4 |
++-------------+--------------+---------------------+-------------+---------------------+-------------+
+71 rows in set (0.01 sec)
+
+-- 57 --
+-- same 56 question but by using lead function
+
+mysql> With NextOrderDate as 
+( Select Customer_ID ,Order_Date ,Lead(OrderDate,1) OVER (Partition by Customer_ID order by Customer_ID, Order_Date) nextOrder_Date) From Orders )Select Customer_ID ,Order_Date ,NextOrder_Date ,dateDiff (nextOrder_Date, Order_Date) DaysBetweenOrders From NextOrderDate Where DateDiff ( NextOrder_Date, Order_Date) <= 5;
+
++-------------+---------------------+---------------------+-------------------+
+| Customer_ID | Order_Date          | NextOrder_Date      | DaysBetweenOrders |
++-------------+---------------------+---------------------+-------------------+
+| ANTON       | 1997-09-22 00:00:00 | 1997-09-25 00:00:00 |                 3 |
+| AROUT       | 1997-11-14 00:00:00 | 1997-11-17 00:00:00 |                 3 |
+| BERGS       | 1996-08-12 00:00:00 | 1996-08-14 00:00:00 |                 2 |
+| BERGS       | 1997-02-12 00:00:00 | 1997-02-13 00:00:00 |                 1 |
+| BERGS       | 1998-02-03 00:00:00 | 1998-02-06 00:00:00 |                 3 |
+| BONAP       | 1997-11-05 00:00:00 | 1997-11-06 00:00:00 |                 1 |
+| BONAP       | 1998-02-05 00:00:00 | 1998-02-09 00:00:00 |                 4 |
+| BONAP       | 1998-03-06 00:00:00 | 1998-03-11 00:00:00 |                 5 |
+| BOTTM       | 1997-01-10 00:00:00 | 1997-01-10 00:00:00 |                 0 |
+| BOTTM       | 1998-03-12 00:00:00 | 1998-03-13 00:00:00 |                 1 |
+| BOTTM       | 1998-03-25 00:00:00 | 1998-03-27 00:00:00 |                 2 |
+| BOTTM       | 1998-04-23 00:00:00 | 1998-04-24 00:00:00 |                 1 |
+| BSBEV       | 1997-05-15 00:00:00 | 1997-05-16 00:00:00 |                 1 |
+| BSBEV       | 1998-03-11 00:00:00 | 1998-03-13 00:00:00 |                 2 |
+| EASTC       | 1998-04-24 00:00:00 | 1998-04-28 00:00:00 |                 4 |
+| ERNSH       | 1997-01-02 00:00:00 | 1997-01-03 00:00:00 |                 1 |
+| ERNSH       | 1997-12-10 00:00:00 | 1997-12-11 00:00:00 |                 1 |
+| ERNSH       | 1997-12-11 00:00:00 | 1997-12-15 00:00:00 |                 4 |
+| ERNSH       | 1998-03-23 00:00:00 | 1998-03-26 00:00:00 |                 3 |
+| ERNSH       | 1998-04-08 00:00:00 | 1998-04-13 00:00:00 |                 5 |
+| FOLKO       | 1998-03-26 00:00:00 | 1998-03-27 00:00:00 |                 1 |
+| FOLKO       | 1998-03-27 00:00:00 | 1998-04-01 00:00:00 |                 5 |
+| FOLKO       | 1998-04-01 00:00:00 | 1998-04-06 00:00:00 |                 5 |
+| FRANK       | 1997-09-16 00:00:00 | 1997-09-19 00:00:00 |                 3 |
+| GODOS       | 1998-02-05 00:00:00 | 1998-02-06 00:00:00 |                 1 |
+| GREAL       | 1997-07-31 00:00:00 | 1997-07-31 00:00:00 |                 0 |
+| HANAR       | 1996-07-08 00:00:00 | 1996-07-10 00:00:00 |                 2 |
+| HANAR       | 1998-03-03 00:00:00 | 1998-03-04 00:00:00 |                 1 |
+| HILAA       | 1997-03-26 00:00:00 | 1997-03-31 00:00:00 |                 5 |
+| HILAA       | 1998-03-18 00:00:00 | 1998-03-19 00:00:00 |                 1 |
+| ISLAT       | 1996-09-26 00:00:00 | 1996-10-01 00:00:00 |                 5 |
+| ISLAT       | 1996-10-01 00:00:00 | 1996-10-03 00:00:00 |                 2 |
+| KOENE       | 1996-10-07 00:00:00 | 1996-10-09 00:00:00 |                 2 |
+| KOENE       | 1997-02-25 00:00:00 | 1997-02-25 00:00:00 |                 0 |
+| LACOR       | 1998-03-24 00:00:00 | 1998-03-24 00:00:00 |                 0 |
+| LEHMS       | 1997-05-12 00:00:00 | 1997-05-14 00:00:00 |                 2 |
+| LEHMS       | 1997-07-08 00:00:00 | 1997-07-09 00:00:00 |                 1 |
+| LILAS       | 1998-05-01 00:00:00 | 1998-05-05 00:00:00 |                 4 |
+| LINOD       | 1998-01-19 00:00:00 | 1998-01-19 00:00:00 |                 0 |
+| LONEP       | 1997-09-09 00:00:00 | 1997-09-11 00:00:00 |                 2 |
+| MAISD       | 1998-02-17 00:00:00 | 1998-02-19 00:00:00 |                 2 |
+| MEREP       | 1997-08-01 00:00:00 | 1997-08-04 00:00:00 |                 3 |
+| QUEEN       | 1998-02-26 00:00:00 | 1998-02-27 00:00:00 |                 1 |
+| QUICK       | 1996-08-20 00:00:00 | 1996-08-21 00:00:00 |                 1 |
+| QUICK       | 1997-10-03 00:00:00 | 1997-10-06 00:00:00 |                 3 |
+| QUICK       | 1998-04-01 00:00:00 | 1998-04-02 00:00:00 |                 1 |
+| RATTC       | 1996-09-25 00:00:00 | 1996-09-27 00:00:00 |                 2 |
+| RICSU       | 1997-11-24 00:00:00 | 1997-11-28 00:00:00 |                 4 |
+| ROMEY       | 1996-08-14 00:00:00 | 1996-08-15 00:00:00 |                 1 |
+| SAVEA       | 1996-12-25 00:00:00 | 1996-12-30 00:00:00 |                 5 |
+| SAVEA       | 1997-07-18 00:00:00 | 1997-07-22 00:00:00 |                 4 |
+| SAVEA       | 1997-10-21 00:00:00 | 1997-10-22 00:00:00 |                 1 |
+| SAVEA       | 1997-10-22 00:00:00 | 1997-10-22 00:00:00 |                 0 |
+| SAVEA       | 1998-03-27 00:00:00 | 1998-03-30 00:00:00 |                 3 |
+| SAVEA       | 1998-04-17 00:00:00 | 1998-04-17 00:00:00 |                 0 |
+| SEVES       | 1997-12-26 00:00:00 | 1997-12-30 00:00:00 |                 4 |
+| SUPRD       | 1998-01-20 00:00:00 | 1998-01-22 00:00:00 |                 2 |
+| SUPRD       | 1998-04-20 00:00:00 | 1998-04-21 00:00:00 |                 1 |
+| TRADH       | 1998-01-13 00:00:00 | 1998-01-15 00:00:00 |                 2 |
+| TRADH       | 1998-01-15 00:00:00 | 1998-01-19 00:00:00 |                 4 |
+| TRAIH       | 1997-06-19 00:00:00 | 1997-06-23 00:00:00 |                 4 |
+| VICTE       | 1997-12-31 00:00:00 | 1998-01-05 00:00:00 |                 5 |
+| VICTE       | 1998-01-21 00:00:00 | 1998-01-23 00:00:00 |                 2 |
+| VINET       | 1997-11-11 00:00:00 | 1997-11-12 00:00:00 |                 1 |
+| WARTH       | 1997-01-13 00:00:00 | 1997-01-16 00:00:00 |                 3 |
+| WELLI       | 1997-12-30 00:00:00 | 1998-01-01 00:00:00 |                 2 |
+| WELLI       | 1998-02-20 00:00:00 | 1998-02-24 00:00:00 |                 4 |
+| WHITC       | 1997-10-06 00:00:00 | 1997-10-08 00:00:00 |                 2 |
+| WILMK       | 1998-02-06 00:00:00 | 1998-02-10 00:00:00 |                 4 |
++-------------+---------------------+---------------------+-------------------+
+69 rows in set (0.01 sec)
